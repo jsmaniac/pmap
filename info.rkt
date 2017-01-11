@@ -1,7 +1,8 @@
 #lang info
 (define collection "pmap")
 (define deps '("base"
-               "rackunit-lib"))
+               "rackunit-lib"
+               "reprovide-lang"))
 (define build-deps '("scribble-lib"
                      "racket-doc"
                      "math-doc"))

@@ -7,7 +7,7 @@
     (namespace-require 'racket/fixnum)
   (current-namespace)))
  
-(eval 'force worker-namespace) ; -> #<procedure:force>
+;(eval 'force worker-namespace) ; -> #<procedure:force>
 
 ;(eval '(apply (lambda (x y)(* x y)) '(2 3)) worker-namespace)
 

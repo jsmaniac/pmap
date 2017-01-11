@@ -3,18 +3,18 @@
 (require racket/place)
 (require racket/runtime-path)
 
-(define-runtime-path  worker "pmapp_worker.rkt")
+(define-runtime-path worker "pmapp_worker.rkt")
 ;(define pa (build-path (current-directory) "pmapp_worker.rkt"))
 
-(provide pmapp)
+(provide pmapp-quoted pmapp)
 
-(define (transpose lists) ; collumns to rows!
+(define (transpose lists) ; columns to rows!
   (apply map list lists))
 
-(define (pmapp func . args) ;start places, give work, collect results, stop places.
+(define (pmapp-quoted func . args) ;start places, give work, collect results, stop places.
   
   (define jlist (transpose args))
-  (display jlist)
+  ;(display jlist)
 
   (let* ([pls (for/list ([i (in-range (length jlist))])
                 (dynamic-place worker 'pmapp-worker))]
@@ -25,7 +25,8 @@
      rlist
      ))
 
-
-
-
-
+(define-syntax (pmapp stx)
+  (syntax-case stx ()
+    [(_ func . args)
+     (quasisyntax/loc stx
+       (pmapp-quoted #,(syntax/loc #'func 'func) . args))]))

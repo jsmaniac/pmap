@@ -27,15 +27,20 @@
  than @racket[map] because of the overhead a future generates.
 }
 
-@defproc[(pmapp [top-level-form any/c] [lst list?] ...+) list?]{
- The @racket[pmapp] function works almost like @racket[map] and applies the
+@defproc[#:kind "syntax"
+         (pmapp [proc (-> arg ...+ place-message-allowed?)]
+                [lst (listof place-message-allowed?)] ...+)
+         (listof place-message-allowed?)]{
+ The @racket[pmapp] macro works almost like @racket[map] and applies the
  function to every item in the list or lists in parallel, using places.
 
- It expects the quoted form of the function to be executed, e.g. @racket['add1]
- instead of @racket[add1].
-
  Places have some restrictions and these have an impact on the implementation
- in several ways, @bold{read on!}
+ in several ways, @bold{READ ON!}
+
+ The first concern is that only some values, as determined by
+ @racket[place-message-allowed?] can be sent to another place. Unfortunately,
+ a procedure cannot be sent. The current implementation of @racket[pmapp] works
+ by quoting the 
 
  On creation of a place, a @tt{.rkt} file is loaded into the new place,
  and one function defined within that file gets executed.
@@ -57,14 +62,38 @@
  Mandelbrot set, see the comparison section!
 
 @examples[#:eval (make-evaluator)
-          (eval:check (pmapp '(lambda (x y) (+ x y))
+          (eval:check (pmapp (lambda (x y) (+ x y))
                              '(1 2 3)
                              '(1 2 3))
                       '(2 4 6))
-          (eval:check (pmapp '(lambda (x y) (fl+ x y))
+          (eval:check (pmapp (lambda (x y) (fl+ x y))
                              '(1.0 2.0 3.0)
                              '(1.0 2.0 3.0))
                       '(2.0 4.0 6.0))]
+}
+
+@defproc[(pmapp-quoted [proc place-message-allowed?]
+                       [lst (listof place-message-allowed?)] ...+)
+         (listof place-message-allowed?)]{
+ The @racket[pmapp-quoted] works like @racket[pmapp], except that the procedure
+ needs to be explicitly quoted:
+
+ @examples[#:eval (make-evaluator)
+           (eval:check (pmapp-quoted '(lambda (x y) (+ x y))
+                                     '(1 2 3)
+                                     '(1 2 3))
+                       '(2 4 6))]
+
+ Unlike @racket[pmapp], which is a macro and cannot be used as a first-class
+ function, @racket[pmapp-quoted] is a function and can be passed as an argument
+ to other functions. The following example passes it to @racket[apply], which
+ would not have been possible with the macro version @racket[pmapp]:
+
+ @examples[#:eval (make-evaluator)
+           (define lists '((1 2 3)
+                           (1 2 3)))
+           (eval:check (apply pmapp-quoted '(lambda (x y) (+ x y)) lists)
+                       '(2 4 6))]
 }
 
 @section{Comparison}
