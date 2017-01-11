@@ -14,8 +14,6 @@
 (provide pmapp-worker)
  
 (define (pmapp-worker place-ch)
-  (let (
-        [v (eval (place-channel-get place-ch) worker-namespace)])
-        (place-channel-put place-ch v)
-        
+  (let ([v (eval (place-channel-get place-ch) worker-namespace)])
+    (place-channel-put place-ch v)
     ))

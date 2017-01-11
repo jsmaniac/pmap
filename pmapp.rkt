@@ -17,9 +17,9 @@
   (display jlist)
 
   (let* ([pls (for/list ([i (in-range (length jlist))])
-                (dynamic-place worker 'pmapp-worker ))]
-         [wpls (for/list ([j pls][w jlist])
-                 (place-channel-put j (append (list func) w)))]         
+                (dynamic-place worker 'pmapp-worker))]
+         [wpls (for/list ([j pls] [w jlist])
+                 (place-channel-put j (cons func w)))]         
          [rlist (for/list ([v pls]) (place-channel-get v))]
          [stop (map place-wait pls)])
      rlist
